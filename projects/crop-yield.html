@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Crop Yield Prediction — Pratik Ghimire</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --green-dark: #1a3a2a;
+    --green-mid: #2d5a3d;
+    --green-accent: #4a8c5c;
+    --green-light: #7ab893;
+    --green-pale: #e8f2eb;
+    --green-mist: #f2f8f4;
+    --gold: #c8a84b;
+    --gold-light: #f0d98a;
+    --text-dark: #0f1f17;
+    --text-mid: #2c4a38;
+    --text-muted: #5a7a68;
+    --white: #ffffff;
+    --border: rgba(74,140,92,0.2);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--green-mist); color: var(--text-dark); line-height: 1.7; }
+
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: rgba(26,58,42,0.97); backdrop-filter: blur(12px);
+    padding: 0 2rem; display: flex; align-items: center; justify-content: space-between;
+    height: 60px; border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .nav-logo { font-family: 'Playfair Display', serif; color: var(--gold-light); font-size: 1.1rem; text-decoration: none; }
+  .nav-back {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    color: rgba(255,255,255,0.7); text-decoration: none; font-size: 0.85rem;
+    transition: color 0.2s;
+  }
+  .nav-back:hover { color: var(--gold-light); }
+
+  /* HERO BANNER */
+  .project-hero {
+    min-height: 55vh;
+    background: linear-gradient(160deg, var(--green-dark) 0%, #1e4d30 60%, #2d6640 100%);
+    display: flex; align-items: flex-end;
+    padding: 80px 2rem 4rem;
+    position: relative; overflow: hidden;
+  }
+  .project-hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background-image: radial-gradient(circle at 70% 30%, rgba(200,168,75,0.1) 0%, transparent 60%),
+      radial-gradient(circle at 20% 80%, rgba(74,140,92,0.15) 0%, transparent 50%);
+  }
+  .hero-grid {
+    position: absolute; inset: 0; opacity: 0.04;
+    background-image: linear-gradient(var(--green-light) 1px, transparent 1px),
+      linear-gradient(90deg, var(--green-light) 1px, transparent 1px);
+    background-size: 60px 60px;
+  }
+  .hero-content { max-width: 900px; margin: 0 auto; width: 100%; position: relative; z-index: 1; }
+  .project-type-tag {
+    display: inline-block;
+    background: rgba(200,168,75,0.15);
+    border: 1px solid rgba(200,168,75,0.4);
+    color: var(--gold-light);
+    font-size: 0.72rem; font-family: 'DM Mono', monospace; letter-spacing: 0.12em;
+    padding: 0.3rem 0.8rem; border-radius: 2px; margin-bottom: 1.2rem; text-transform: uppercase;
+  }
+  .project-hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    color: var(--white); line-height: 1.15; margin-bottom: 1rem;
+  }
+  .project-hero h1 span { color: var(--gold-light); }
+  .hero-meta { display: flex; gap: 2rem; flex-wrap: wrap; margin-top: 1.5rem; }
+  .meta-item { }
+  .meta-label { font-family: 'DM Mono', monospace; font-size: 0.65rem; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.4); margin-bottom: 0.2rem; }
+  .meta-value { color: rgba(255,255,255,0.85); font-size: 0.9rem; }
+  .hero-btns { display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 2rem; }
+  .btn-gold { background: var(--gold); color: var(--green-dark); padding: 0.65rem 1.5rem; border-radius: 3px; font-weight: 500; font-size: 0.85rem; text-decoration: none; transition: background 0.2s; }
+  .btn-gold:hover { background: var(--gold-light); }
+  .btn-outline { border: 1px solid rgba(255,255,255,0.3); color: rgba(255,255,255,0.8); padding: 0.65rem 1.5rem; border-radius: 3px; font-size: 0.85rem; text-decoration: none; transition: border-color 0.2s; }
+  .btn-outline:hover { border-color: var(--gold-light); color: var(--gold-light); }
+
+  /* CONTENT */
+  .content-wrap { max-width: 900px; margin: 0 auto; padding: 4rem 2rem; }
+
+  /* SECTION BLOCKS */
+  .block { margin-bottom: 3.5rem; }
+  .block-label { font-family: 'DM Mono', monospace; font-size: 0.68rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--green-accent); margin-bottom: 0.4rem; }
+  .block-title { font-family: 'Playfair Display', serif; font-size: 1.5rem; color: var(--green-dark); margin-bottom: 1.2rem; }
+  .block p { color: var(--text-mid); margin-bottom: 0.9rem; font-size: 0.97rem; }
+  .block p strong { color: var(--green-dark); }
+
+  /* PIPELINE */
+  .pipeline { display: flex; align-items: flex-start; gap: 0; flex-wrap: wrap; margin: 2rem 0; }
+  .pipeline-step {
+    flex: 1; min-width: 100px;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1.2rem 1rem;
+    text-align: center;
+    position: relative;
+  }
+  .pipeline-step:not(:last-child)::after {
+    content: '→';
+    position: absolute; right: -14px; top: 50%; transform: translateY(-50%);
+    color: var(--green-accent); font-size: 1.1rem; z-index: 1;
+  }
+  .pipeline-step .step-num { font-family: 'DM Mono', monospace; font-size: 0.65rem; color: var(--green-accent); letter-spacing: 0.1em; margin-bottom: 0.4rem; }
+  .pipeline-step .step-name { font-size: 0.82rem; font-weight: 500; color: var(--text-dark); }
+  .pipeline-step .step-detail { font-size: 0.72rem; color: var(--text-muted); margin-top: 0.3rem; }
+
+  /* RESULTS TABLE */
+  .results-table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; }
+  .results-table th {
+    background: var(--green-dark); color: var(--gold-light);
+    font-family: 'DM Mono', monospace; font-size: 0.72rem; letter-spacing: 0.08em;
+    padding: 0.8rem 1.2rem; text-align: left;
+  }
+  .results-table td { padding: 0.75rem 1.2rem; font-size: 0.88rem; color: var(--text-mid); border-bottom: 1px solid var(--border); }
+  .results-table tr:nth-child(even) td { background: var(--green-pale); }
+  .results-table tr.winner td { background: rgba(74,140,92,0.1); font-weight: 500; color: var(--green-dark); }
+  .winner-badge {
+    display: inline-block; background: var(--gold); color: var(--green-dark);
+    font-size: 0.65rem; font-family: 'DM Mono', monospace; padding: 0.15rem 0.5rem;
+    border-radius: 2px; margin-left: 0.5rem; letter-spacing: 0.05em;
+  }
+
+  /* CODE BLOCK */
+  .code-block {
+    background: var(--green-dark);
+    border-radius: 4px;
+    padding: 1.5rem;
+    overflow-x: auto;
+    margin: 1.5rem 0;
+    position: relative;
+  }
+  .code-block .code-lang {
+    position: absolute; top: 0.75rem; right: 1rem;
+    font-family: 'DM Mono', monospace; font-size: 0.65rem; color: rgba(255,255,255,0.3);
+    letter-spacing: 0.08em; text-transform: uppercase;
+  }
+  .code-block pre { font-family: 'DM Mono', monospace; font-size: 0.82rem; color: rgba(255,255,255,0.85); line-height: 1.7; white-space: pre-wrap; }
+  .code-block .kw { color: var(--gold-light); }
+  .code-block .fn { color: #7dd3a8; }
+  .code-block .str { color: #f1a66a; }
+  .code-block .cm { color: rgba(255,255,255,0.35); font-style: italic; }
+  .code-block .num { color: #a8d8ea; }
+
+  /* DATA SOURCES */
+  .data-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.5rem 0; }
+  .data-card {
+    background: var(--white); border: 1px solid var(--border); border-radius: 4px;
+    padding: 1.2rem 1.5rem;
+    border-top: 3px solid var(--green-accent);
+  }
+  .data-card h4 { font-family: 'DM Mono', monospace; font-size: 0.72rem; color: var(--green-accent); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.5rem; }
+  .data-card p { font-size: 0.84rem; color: var(--text-muted); }
+  .data-card ul { list-style: none; margin-top: 0.5rem; }
+  .data-card ul li { font-size: 0.82rem; color: var(--text-mid); padding: 0.2rem 0; display: flex; align-items: center; gap: 0.4rem; }
+  .data-card ul li::before { content: '▸'; color: var(--green-light); font-size: 0.7rem; }
+
+  /* TAGS */
+  .tag-row { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 1rem 0; }
+  .tag { background: var(--green-pale); color: var(--green-mid); font-size: 0.72rem; padding: 0.25rem 0.65rem; border-radius: 2px; font-family: 'DM Mono', monospace; border: 1px solid var(--border); }
+
+  /* CONFERENCE BADGE */
+  .conf-badge {
+    background: var(--green-dark);
+    border: 1px solid var(--gold);
+    border-radius: 4px;
+    padding: 1.5rem 2rem;
+    display: flex; gap: 1.5rem; align-items: center;
+    margin: 1.5rem 0;
+  }
+  .conf-icon { font-size: 2.5rem; }
+  .conf-text h4 { font-family: 'Playfair Display', serif; color: var(--white); font-size: 1.05rem; margin-bottom: 0.3rem; }
+  .conf-text p { font-size: 0.85rem; color: rgba(255,255,255,0.55); }
+  .conf-text span { color: var(--gold-light); }
+
+  /* STREAMLIT PREVIEW */
+  .app-preview {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    margin: 1.5rem 0;
+  }
+  .app-preview-bar {
+    background: #f5f5f5;
+    padding: 0.6rem 1rem;
+    display: flex; align-items: center; gap: 0.5rem;
+    border-bottom: 1px solid #eee;
+  }
+  .app-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .app-preview-content { padding: 2rem; text-align: center; color: var(--text-muted); font-size: 0.88rem; }
+  .app-preview-content a { color: var(--green-accent); font-weight: 500; text-decoration: none; }
+
+  /* BOTTOM NAV */
+  .bottom-nav {
+    background: var(--green-dark);
+    padding: 2rem;
+    display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;
+  }
+  .bottom-nav a { color: rgba(255,255,255,0.6); text-decoration: none; font-size: 0.85rem; transition: color 0.2s; }
+  .bottom-nav a:hover { color: var(--gold-light); }
+  .bottom-nav .home-link { color: var(--gold-light); font-family: 'Playfair Display', serif; }
+
+  footer { background: #0a1a10; text-align: center; padding: 1.2rem; font-size: 0.75rem; color: rgba(255,255,255,0.2); font-family: 'DM Mono', monospace; }
+
+  @media (max-width: 768px) {
+    .pipeline { flex-direction: column; }
+    .pipeline-step:not(:last-child)::after { content: '↓'; right: auto; left: 50%; transform: translateX(-50%); top: auto; bottom: -18px; }
+    .data-cards { grid-template-columns: 1fr; }
+    .hero-meta { gap: 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="../index.html">Pratik Ghimire</a>
+  <a class="nav-back" href="../index.html">← Back to Portfolio</a>
+</nav>
+
+<!-- HERO -->
+<div class="project-hero">
+  <div class="hero-grid"></div>
+  <div class="hero-content">
+    <div class="project-type-tag">Machine Learning · Final Year Project</div>
+    <h1>Crop Yield Prediction<br/><span>in Nepal</span></h1>
+    <div class="hero-meta">
+      <div class="meta-item"><div class="meta-label">Status</div><div class="meta-value">Presented · ICRTAI 2025</div></div>
+      <div class="meta-item"><div class="meta-label">Best Model</div><div class="meta-value">XGBoost Regressor</div></div>
+      <div class="meta-item"><div class="meta-label">Data Sources</div><div class="meta-value">NASA POWER + MoALD</div></div>
+      <div class="meta-item"><div class="meta-label">Deployment</div><div class="meta-value">Live Streamlit App</div></div>
+    </div>
+    <div class="hero-btns">
+      <a href="https://github.com/pratik-9051/crop-yield-prediction-nepal" target="_blank" class="btn-gold">View on GitHub →</a>
+      <a href="https://crop-yield-prediction-nepal-nhugtaob97vm7rnp2mj9be.streamlit.app/" target="_blank" class="btn-outline">🌾 Open Live App</a>
+    </div>
+  </div>
+</div>
+
+<!-- CONTENT -->
+<div class="content-wrap">
+
+  <!-- OVERVIEW -->
+  <div class="block">
+    <div class="block-label">Overview</div>
+    <div class="block-title">The Problem</div>
+    <p>Nepal's agricultural sector feeds over 65% of the population, yet farmers and policymakers have almost no data-driven tools to anticipate crop yield fluctuations. Climate variability — erratic monsoons, temperature shifts, unexpected frost — makes season-to-season yield prediction genuinely difficult.</p>
+    <p>This project built a <strong>full machine learning pipeline</strong> that predicts district-level crop yields across Nepal by combining historical agricultural statistics with meteorological data from NASA's POWER satellite system. The goal: give farmers and agricultural planners a tool that actually works with Nepal's limited data infrastructure.</p>
+  </div>
+
+  <!-- PIPELINE -->
+  <div class="block">
+    <div class="block-label">Methodology</div>
+    <div class="block-title">Pipeline Architecture</div>
+    <div class="pipeline">
+      <div class="pipeline-step">
+        <div class="step-num">01</div>
+        <div class="step-name">Data Collection</div>
+        <div class="step-detail">MoALD + NASA POWER API</div>
+      </div>
+      <div class="pipeline-step">
+        <div class="step-num">02</div>
+        <div class="step-name">Preprocessing</div>
+        <div class="step-detail">Merge, encode, impute, scale</div>
+      </div>
+      <div class="pipeline-step">
+        <div class="step-num">03</div>
+        <div class="step-name">Feature Eng.</div>
+        <div class="step-detail">Log & Yeo-Johnson transforms</div>
+      </div>
+      <div class="pipeline-step">
+        <div class="step-num">04</div>
+        <div class="step-name">Model Training</div>
+        <div class="step-detail">7 regression algorithms</div>
+      </div>
+      <div class="pipeline-step">
+        <div class="step-num">05</div>
+        <div class="step-name">Deployment</div>
+        <div class="step-detail">Streamlit web app</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DATA SOURCES -->
+  <div class="block">
+    <div class="block-label">Data</div>
+    <div class="block-title">Data Sources</div>
+    <div class="data-cards">
+      <div class="data-card">
+        <h4>MoALD Nepal</h4>
+        <p>Ministry of Agriculture and Livestock Development — national crop statistics</p>
+        <ul>
+          <li>District-level yield data</li>
+          <li>Crop area harvested</li>
+          <li>Crop type labels</li>
+          <li>Multi-year historical records</li>
+        </ul>
+      </div>
+      <div class="data-card">
+        <h4>NASA POWER API</h4>
+        <p>Prediction of Worldwide Energy Resources — satellite-derived meteorological data</p>
+        <ul>
+          <li>Temperature (min/max/avg)</li>
+          <li>Precipitation</li>
+          <li>Solar radiation</li>
+          <li>Relative humidity</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- CODE SNIPPET -->
+  <div class="block">
+    <div class="block-label">Code</div>
+    <div class="block-title">Key Implementation</div>
+    <p>The core model evaluation loop — all 8 regression algorithms evaluated on both log-scale and original scale, with the target variable log1p-transformed before training:</p>
+    <div class="code-block">
+      <span class="code-lang">Python</span>
+      <pre><span class="kw">import</span> numpy <span class="kw">as</span> np
+<span class="kw">from</span> sklearn.linear_model <span class="kw">import</span> LinearRegression, Ridge, Lasso
+<span class="kw">from</span> sklearn.tree <span class="kw">import</span> DecisionTreeRegressor
+<span class="kw">from</span> sklearn.ensemble <span class="kw">import</span> RandomForestRegressor, GradientBoostingRegressor
+<span class="kw">from</span> sklearn.svm <span class="kw">import</span> SVR
+<span class="kw">from</span> sklearn.metrics <span class="kw">import</span> mean_squared_error, r2_score
+
+<span class="cm"># Target: log1p transformed for better regression performance</span>
+y = np.<span class="fn">log1p</span>(df_encoded[<span class="str">'h/ha_yield'</span>])
+
+<span class="cm"># Evaluate each model on log-scale and original scale</span>
+<span class="kw">def</span> <span class="fn">evaluate_model</span>(model, name, X_train, X_test, y_train, y_test):
+    model.<span class="fn">fit</span>(X_train, y_train)
+    y_pred_log = model.<span class="fn">predict</span>(X_test)
+
+    <span class="cm"># Convert back to original scale</span>
+    y_pred_orig = np.<span class="fn">expm1</span>(y_pred_log)
+    y_test_orig = np.<span class="fn">expm1</span>(y_test)
+
+    r2  = <span class="fn">r2_score</span>(y_test_orig, y_pred_orig)
+    mse = <span class="fn">mean_squared_error</span>(y_test_orig, y_pred_orig)
+    <span class="kw">return</span> r2, mse
+
+models = [
+    (<span class="str">"Linear Regression"</span>,          LinearRegression()),
+    (<span class="str">"Ridge Regression"</span>,            Ridge()),
+    (<span class="str">"Lasso Regression"</span>,            Lasso()),
+    (<span class="str">"Decision Tree"</span>,               DecisionTreeRegressor(random_state=<span class="num">42</span>)),
+    (<span class="str">"Random Forest"</span>,               RandomForestRegressor(random_state=<span class="num">42</span>)),
+    (<span class="str">"Gradient Boosting"</span>,           GradientBoostingRegressor(random_state=<span class="num">42</span>)),
+    (<span class="str">"Support Vector Regression"</span>,   SVR()),
+]
+<span class="cm"># XGBoost trained separately using xgb.train() with early stopping
+# Best result → R² = 0.8175, MSE = 0.2031</span></pre>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div class="block">
+    <div class="block-label">Results</div>
+    <div class="block-title">Model Comparison</div>
+    <p>All models evaluated on a held-out 20% test set. Metrics computed on the original scale (after inverse log1p transform). XGBoost achieved the best R² and lowest MSE:</p>
+    <table class="results-table">
+      <thead>
+        <tr>
+          <th>Model</th>
+          <th>R² Score</th>
+          <th>MSE</th>
+          <th>Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="winner">
+          <td>XGBoost <span class="winner-badge">BEST</span></td>
+          <td>0.8175</td>
+          <td>0.2031</td>
+          <td>Gradient boosting with early stopping, handles non-linearity best</td>
+        </tr>
+        <tr>
+          <td>Random Forest</td>
+          <td>0.7879</td>
+          <td>0.2360</td>
+          <td>Strong ensemble baseline, slightly below XGBoost</td>
+        </tr>
+        <tr>
+          <td>Gradient Boosting</td>
+          <td>0.7422</td>
+          <td>0.2869</td>
+          <td>Good but slower convergence than XGBoost</td>
+        </tr>
+        <tr>
+          <td>Decision Tree</td>
+          <td>0.6285</td>
+          <td>0.4135</td>
+          <td>Prone to overfitting without pruning</td>
+        </tr>
+        <tr>
+          <td>SVR</td>
+          <td>0.4784</td>
+          <td>0.5805</td>
+          <td>Sensitive to feature scaling, limited on tabular data</td>
+        </tr>
+        <tr>
+          <td>Linear Regression</td>
+          <td>0.3907</td>
+          <td>0.6781</td>
+          <td>Misses non-linear crop-weather interactions</td>
+        </tr>
+        <tr>
+          <td>Ridge Regression</td>
+          <td>0.3906</td>
+          <td>0.6782</td>
+          <td>Marginal improvement over Linear Regression</td>
+        </tr>
+        <tr>
+          <td>Lasso Regression</td>
+          <td>-0.0001</td>
+          <td>1.1130</td>
+          <td>Over-regularized — collapsed predictions</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- CONFERENCE -->
+  <div class="block">
+    <div class="block-label">Conference</div>
+    <div class="block-title">Research Output</div>
+    <div class="conf-badge">
+      <div class="conf-icon">📄</div>
+      <div class="conf-text">
+        <h4>Meteorology-Driven Crop Yield Prediction in Nepal: A Regression Approach</h4>
+        <p>Presented at the International Conference on Recent Trends in Artificial Intelligence · <span>ICRTAI 2025</span></p>
+      </div>
+    </div>
+    <p>The paper presents the full methodology, dataset construction, feature engineering decisions, and model evaluation framework. It contextualizes the work within Nepal's agricultural data scarcity and argues for satellite-derived meteorological inputs as a scalable alternative to ground station networks.</p>
+
+    <!-- PRESENTATION PHOTO -->
+    <div style="margin-top:1.5rem; border-radius:6px; overflow:hidden; border: 1px solid var(--border); position:relative;">
+      <img src="../pratik-presenting.png" alt="Pratik Ghimire presenting at ICRTAI 2025"
+        style="width:100%; max-height:420px; object-fit:cover; object-position: center top; display:block;"/>
+      <div style="position:absolute; bottom:0; left:0; right:0;
+        background:linear-gradient(transparent, rgba(15,31,23,0.85));
+        padding:1rem 1.5rem;">
+        <span style="font-family:'DM Mono',monospace; font-size:0.72rem; color:rgba(255,255,255,0.7); letter-spacing:0.06em;">
+          Presenting at ICRTAI 2025
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- DEPLOYMENT -->
+  <div class="block">
+    <div class="block-label">Deployment</div>
+    <div class="block-title">Live Web Application</div>
+    <p>The final XGBoost model was wrapped in a <strong>Streamlit web application</strong> that lets users input district, crop type, and meteorological parameters to get a predicted yield. Designed to be accessible to agricultural officers and researchers without requiring any coding knowledge.</p>
+    <div class="app-preview">
+      <div class="app-preview-bar">
+        <div class="app-dot" style="background:#ff5f56;"></div>
+        <div class="app-dot" style="background:#ffbd2e;"></div>
+        <div class="app-dot" style="background:#27c93f;"></div>
+        <span style="font-family:'DM Mono',monospace;font-size:0.72rem;color:#999;margin-left:0.5rem;">crop-yield-prediction-nepal-nhugtaob97vm7rnp2mj9be.streamlit.app</span>
+      </div>
+      <div class="app-preview-content">
+        <p style="font-size:2rem;margin-bottom:1rem;">🌾</p>
+        <p><strong>Crop Yield Prediction — Nepal</strong></p>
+        <p style="margin:0.5rem 0;">Input district + crop type + weather parameters → get predicted yield</p>
+        <a href="https://crop-yield-prediction-nepal-nhugtaob97vm7rnp2mj9be.streamlit.app/" target="_blank">Open Live App →</a>
+      </div>
+    </div>
+
+    <div class="tag-row">
+      <span class="tag">XGBoost</span>
+      <span class="tag">Python</span>
+      <span class="tag">Streamlit</span>
+      <span class="tag">NASA POWER</span>
+      <span class="tag">MoALD Data</span>
+      <span class="tag">Scikit-learn</span>
+      <span class="tag">Pandas</span>
+      <span class="tag">NumPy</span>
+      <span class="tag">Yeo-Johnson Transform</span>
+      <span class="tag">Google Colab</span>
+    </div>
+  </div>
+
+</div>
+
+<div class="bottom-nav">
+  <a href="../index.html" class="home-link">← Pratik Ghimire</a>
+  <div style="display:flex;gap:1.5rem;">
+    <a href="computer-vision.html">Computer Vision Projects →</a>
+    <a href="rice-transplanter.html">Rice Transplanter →</a>
+  </div>
+</div>
+
+<footer>© 2026 Pratik Ghimire · Kathmandu, Nepal</footer>
+
+</body>
+</html>
